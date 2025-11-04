@@ -3,4 +3,8 @@ dist
 generated
 *.log
 .DS_Store
+# Keep icons directory but ignore any auto-generated files
+icons/*.pdf
+icons/*.aux
+icons/*.log
 

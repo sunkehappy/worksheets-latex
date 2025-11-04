@@ -9,6 +9,7 @@
     "build:all": "pnpm gen && pnpm build",
     "gen:pictures": "ts-node scripts/generate_pictures.ts",
     "build:pictures": "ts-node scripts/build_pictures.ts",
+    "convert:icons": "ts-node scripts/convert_svg_to_pdf.ts",
     "clean": "rm -rf dist/* generated/*.tex"
   },
   "devDependencies": {

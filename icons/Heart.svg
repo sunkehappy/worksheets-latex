@@ -1,0 +1,6 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Heart shape -->
+  <path d="M 50 72 Q 50 58 35 47 Q 20 35 20 22 Q 20 10 32 10 Q 40 10 50 20 Q 60 10 68 10 Q 80 10 80 22 Q 80 35 65 47 Q 50 58 50 72" 
+        stroke="black" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+

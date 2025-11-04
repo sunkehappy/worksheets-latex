@@ -19,7 +19,9 @@ function rng(seed: number) {
 }
 
 function generate(p: Params): Problem[] {
-  const r = rng(p.seed ?? 42);
+  // 如果没有指定 seed，使用随机 seed（基于时间戳）
+  const seed = p.seed !== undefined ? p.seed : Date.now();
+  const r = rng(seed);
   const out: Problem[] = [];
 
   while (out.length < p.count) {
@@ -58,7 +60,12 @@ function toAnswersTex(problems: Problem[]): string {
 }
 
 function main() {
-  const argv = minimist(process.argv.slice(2));
+  // 处理 pnpm 传递的 -- 分隔符：如果第一个参数是 --，跳过它
+  let args = process.argv.slice(2);
+  if (args[0] === '--') {
+    args = args.slice(1);
+  }
+  const argv = minimist(args);
 
   const p: Params = {
     count: Number(argv.count ?? 24),
@@ -66,7 +73,7 @@ function main() {
     max: Number(argv.max ?? 10),
     noCarry: Boolean(argv.noCarry ?? false),
     allowZeroSingle: Boolean(argv.allowZeroSingle ?? false),
-    seed: argv.seed !== undefined ? Number(argv.seed) : 2025,
+    seed: argv.seed !== undefined ? Number(argv.seed) : undefined,
     version: String(argv.version ?? "v1")
   };
 
@@ -86,11 +93,13 @@ function main() {
   fs.writeFileSync("generated/problems.tex", toTwoColumnTex(problems));
   fs.writeFileSync("generated/answers.tex", toAnswersTex(problems));
 
+  // 计算实际使用的 seed（如果未指定则使用随机值）
+  const actualSeed = p.seed !== undefined ? p.seed : Date.now();
   // 同时写出 meta，便于命名
   const meta = {
     topic: "addition",
     range: `${p.min}-${p.max}`,
-    seed: p.seed ?? 2025,
+    seed: actualSeed,
     noCarry: !!p.noCarry,
     version: p.version
   };

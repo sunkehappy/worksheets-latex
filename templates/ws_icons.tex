@@ -1,49 +1,45 @@
-% templates/icons.tex
+% templates/ws_icons.tex
+% SVG-based icons for worksheets (using PDF conversion for compatibility)
 \makeatletter
 \@ifundefined{wsiconsloaded}{%
-\@ifpackageloaded{tikz}{}{\usepackage{tikz}}
 
-% 通用：单个图标的线宽（黑白打印友好）
-\def\wsiconlinewidth{0.9pt}
+% 使用 graphicx 包来插入图片（PDF 格式）
+% SVG 文件需要预先转换为 PDF（可以使用脚本自动转换）
+\usepackage{graphicx}
 
-% ===== 基础形状 =====
-% Apple（圆+叶+茎）
-\def\wsiconApple#1{% #1 = scale
-  \begin{tikzpicture}[scale=#1, baseline={(0,-0.1)}]
-    \draw[line width=\wsiconlinewidth] (0,0) circle (0.5);
-    \draw[line width=\wsiconlinewidth] (0,0.5) -- (0,0.8);
-    \draw[line width=\wsiconlinewidth] (0.15,0.85) .. controls (0.5,1.05) .. (0.35,0.68) -- cycle;
-    \draw[line width=\wsiconlinewidth] (0.15,0.85) .. controls (0.5,1.05) .. (0.35,0.68) -- cycle;
-  \end{tikzpicture}%
-}
-
-% Star（五角星）
-\def\wsiconStar#1{% #1 = scale
-  \begin{tikzpicture}[scale=#1, baseline={(0,-0.1)}]
-    \draw[line width=\wsiconlinewidth]
-      (90:0.55) -- (162:0.55) -- (234:0.55) -- (306:0.55) -- (18:0.55) -- cycle;
-  \end{tikzpicture}%
-}
-
-% Triangle（等边三角形）
-\def\wsiconTriangle#1{% #1 = scale
-  \begin{tikzpicture}[scale=#1, baseline={(0,-0.1)}]
-    \draw[line width=\wsiconlinewidth] (0,0.58) -- (-0.5,-0.29) -- (0.5,-0.29) -- cycle;
-  \end{tikzpicture}%
-}
-
-% ===== 调度器：按名称选择图标 =====
-% #1 = name, #2 = scale
+% ===== SVG 图标插入宏 =====
+% \WSDrawIcon{name}{scale}
+% 从 icons/ 目录加载 PDF 文件（由 SVG 转换而来）
+% 优先使用 PDF，如果不存在则尝试 SVG（如果系统支持）
 \def\WSDrawIcon#1#2{%
-  \expandafter\ifx\csname wsicon#1\endcsname\relax
-    \wsiconApple{#2}%
-  \else
-    \csname wsicon#1\endcsname{#2}%
-  \fi
+  % 优先使用 PDF 版本（推荐：预先转换 SVG 为 PDF）
+  \IfFileExists{../icons/#1.pdf}{%
+    \resizebox{#2em}{#2em}{%
+      \includegraphics{../icons/#1.pdf}%
+    }%
+  }{%
+    % 如果 PDF 不存在，尝试 SVG（需要系统支持）
+    \IfFileExists{../icons/#1.svg}{%
+      % 尝试使用 svg 包（如果可用）
+      \@ifpackageloaded{svg}{%
+        \resizebox{#2em}{#2em}{%
+          \includesvg[inkscapeformat=pdf,inkscapelatex=false]{../icons/#1}%
+        }%
+      }{%
+        % 如果 svg 包不可用，显示占位符并提示
+        \fbox{\rule{#2em}{#2em}}%
+        \PackageWarning{wsicons}{Icon #1.svg found but svg package not available. Please convert to PDF.}%
+      }%
+    }{%
+      % 如果文件都不存在，显示占位符
+      \fbox{\rule{#2em}{#2em}}%
+      \PackageWarning{wsicons}{Icon #1 not found (tried .pdf and .svg)}%
+    }%
+  }%
 }
 
 % ===== N 个图标排成一行（自动留间距） =====
-% \WSIconRow{name}{count}{scale}{gap em}
+% \WSIconRow{name}{count}{scale em}{gap em}
 \def\WSIconRow#1#2#3#4{%
   \foreach \i in {1,...,#2}{\WSDrawIcon{#1}{#3}\hspace{#4 em}}%
 }
@@ -51,9 +47,9 @@
 % ===== 题目：图形加法 =====
 % \WSPictureAddIcons{nameL}{nL}{nameR}{nR}
 \def\WSPictureAddIcons#1#2#3#4{%
-  \WSIconRow{#1}{#2}{0.75}{0.4}%
+  \WSIconRow{#1}{#2}{1.6}{0.4}%
   \hspace{0.6em}{\Large +}\hspace{0.6em}%
-  \WSIconRow{#3}{#4}{0.75}{0.4}%
+  \WSIconRow{#3}{#4}{1.6}{0.4}%
   \hspace{0.6em}{\Large =}\hspace{0.6em}%
   \fbox{\rule{0pt}{10pt}\rule{42pt}{0pt}}%
 }
@@ -67,15 +63,15 @@
   \pgfmathtruncatemacro{\rowsint}{ceil(\c/\per)}%
   \pgfmathtruncatemacro{\lastint}{mod(\c,\per)}%
   \ifnum\rowsint=1
-    \WSIconRow{#1}{#2}{0.75}{0.4}%
+    \WSIconRow{#1}{#2}{1.6}{0.4}%
   \else
     % 第一行
-    \WSIconRow{#1}{#3}{0.75}{0.4}\\[-2pt]
-    % 第二行（余数）
+    \WSIconRow{#1}{#3}{1.6}{0.4}%
+    % 第二行（余数）- 使用 \linebreak[0] 强制换行，在表格单元格中安全
     \ifnum\lastint=0
-      \WSIconRow{#1}{#3}{0.75}{0.4}%
+      \linebreak[0]\vskip-2pt\WSIconRow{#1}{#3}{1.6}{0.4}%
     \else
-      \WSIconRow{#1}{\lastint}{0.75}{0.4}%
+      \linebreak[0]\vskip-2pt\WSIconRow{#1}{\lastint}{1.6}{0.4}%
     \fi
   \fi
 }
@@ -84,11 +80,59 @@
 % \WSPictureAddIcons2L{nameL}{nL}{nameR}{nR}{perRow}
 \def\WSPictureAddIcons2L#1#2#3#4#5{%
   \WSPictureAddIconsWrap{#1}{#2}{#5}%
-  \hspace{0.6em}{\Large +}\hspace{0.6em}%
+  \hspace{0.3em}{\Large +}\hspace{0.3em}%
   \WSPictureAddIconsWrap{#3}{#4}{#5}%
-  \hspace{0.6em}{\Large =}\hspace{0.6em}%
-  \fbox{\rule{0pt}{10pt}\rule{42pt}{0pt}}%
+  \hspace{0.3em}{\Large =}\hspace{0.3em}%
+  \fbox{\rule{0pt}{10pt}\rule{32pt}{0pt}}%
 }
+
+% ===== 一行一个算式：左边图形，中间加号，右边空白算式 =====
+% \WSPictureAddEquation{nameL}{nL}{nameR}{nR}{perRow}
+\def\WSPictureAddEquation#1#2#3#4#5{%
+  % 使用表格布局：左图形 | 加号 | 右图形 | 空白算式
+  % 所有列都使用 m 列类型（垂直居中），确保加号和等式与最高的图标列垂直居中
+  % 加号左边间距较小，右边较大，使加号偏左，右侧图形偏右
+  % 使用 \arrayrulewidth=0pt 来隐藏表格的所有横线和竖线
+  \begingroup
+  \setlength{\arrayrulewidth}{0pt}%
+  \renewcommand{\arraystretch}{1}%
+  \begin{tabular*}{\linewidth}{@{}>{\raggedright\arraybackslash}m{0.27\linewidth}@{\hspace{0em}}>{\centering\arraybackslash}m{0.08\linewidth}@{\hspace{0em}}>{\raggedright\arraybackslash}m{0.27\linewidth}@{\extracolsep{\fill}}>{\raggedleft\arraybackslash}m{0.30\linewidth}@{}}
+    \WSPictureAddIconsWrapLarge{#1}{#2}{#5}%
+    &
+    {\LARGE\, + \,}%
+    &
+    \WSPictureAddIconsWrapLarge{#3}{#4}{#5}%
+    &
+    \raisebox{-3.5pt}{\rule{30pt}{1pt}}\hspace{0.1em}{\LARGE\, + \,}\hspace{0.1em}%
+    \raisebox{-3.5pt}{\rule{30pt}{1pt}}\hspace{0.1em}{\LARGE\, = \,}\hspace{0.1em}%
+    \raisebox{-3.5pt}{\rule{30pt}{1pt}}%
+  \end{tabular*}%
+  \endgroup
+}
+
+% ===== 图形换行版本（用于算式，换行后左对齐，尺寸调小以便对齐） =====
+\def\WSPictureAddIconsWrapLarge#1#2#3{%
+  \def\c{#2}%
+  \def\per{#3}%
+  \pgfmathtruncatemacro{\rowsint}{ceil(\c/\per)}%
+  \pgfmathtruncatemacro{\lastint}{mod(\c,\per)}%
+  \ifnum\rowsint=1
+    \WSIconRow{#1}{#2}{2.3}{0.2}%
+  \else
+    % 第一行
+    \WSIconRow{#1}{#3}{2.3}{0.2}%
+    % 第二行（余数）- 换行后左对齐，便于数数
+    \ifnum\lastint=0
+      \par\vskip-2pt\noindent\WSIconRow{#1}{#3}{2.3}{0.2}%
+    \else
+      \par\vskip-2pt\noindent\WSIconRow{#1}{\lastint}{2.3}{0.2}%
+    \fi
+  \fi
+}
+
+% 需要 tikz 包用于 \foreach 和数学计算
+\@ifpackageloaded{tikz}{}{\usepackage{tikz}}
+\@ifpackageloaded{xfp}{}{\usepackage{xfp}}
 
 % Backward-compatible aliases (define only if currently undefined)
 \@ifundefined{PictureAddIcons}{\def\PictureAddIcons#1#2#3#4{\WSPictureAddIcons{#1}{#2}{#3}{#4}}}{}
