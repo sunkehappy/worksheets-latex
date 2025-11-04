@@ -1,0 +1,22 @@
+{
+  "name": "k12-worksheets-latex-en",
+  "private": true,
+  "version": "1.0.0",
+  "description": "LaTeX-based K12 math worksheets (English, text-only addition). Local pre-generation with Tectonic.",
+  "scripts": {
+    "gen": "ts-node scripts/generate_problems.ts",
+    "build": "ts-node scripts/build.ts",
+    "build:all": "pnpm gen && pnpm build",
+    "gen:pictures": "ts-node scripts/generate_pictures.ts",
+    "build:pictures": "ts-node scripts/build_pictures.ts",
+    "clean": "rm -rf dist/* generated/*.tex"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3",
+    "minimist": "^1.2.8",
+    "@types/node": "^20.0.0",
+    "@types/minimist": "^1.2.5"
+  }
+}
+

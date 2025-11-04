@@ -1,0 +1,34 @@
+\documentclass[11pt]{article}
+\usepackage[margin=15mm]{geometry}
+\usepackage{array}
+\usepackage{multicol}
+\usepackage{xfp}
+
+\setlength{\parindent}{0pt}
+
+% Single text question: a + b = ____ (answer line)
+\newcommand{\TextAdd}[2]{\Large #1 + #2 = \rule{40pt}{0.6pt}}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE Addition Practice}\\[4pt]
+  Name:\ \rule{0.5\linewidth}{0.4pt}
+\end{center}
+
+\setlength{\extrarowheight}{12pt}
+\begin{tabular}{p{0.48\linewidth} p{0.48\linewidth}}
+\input{../generated/problems.tex}
+\end{tabular}
+
+\newpage
+
+{\large \textbf{Answer Key}}
+
+\begin{multicols}{2}
+\begin{enumerate}
+\input{../generated/answers.tex}
+\end{enumerate}
+\end{multicols}
+
+\end{document}

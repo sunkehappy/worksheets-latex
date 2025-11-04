@@ -1,0 +1,34 @@
+\documentclass[11pt]{article}
+\usepackage[margin=15mm]{geometry}
+\usepackage{array}
+\usepackage{multicol}
+\usepackage{xfp}
+
+% Use local namespaced icons to avoid conflicts with any TeX distribution files
+\input{ws_icons.tex}
+
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE Addition Practice with Pictures}\\[4pt]
+  Name:\ \rule{0.5\linewidth}{0.4pt}
+\end{center}
+
+\setlength{\extrarowheight}{16pt}
+\begin{tabular}{p{0.48\linewidth} p{0.48\linewidth}}
+\input{../generated/problems_pictures.tex}
+\end{tabular}
+
+\newpage
+
+{\large \textbf{Answer Key}}
+
+\begin{multicols}{2}
+\begin{enumerate}
+\input{../generated/answers_pictures.tex}
+\end{enumerate}
+\end{multicols}
+
+\end{document}
