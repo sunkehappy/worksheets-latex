@@ -70,22 +70,7 @@ dist/addition_no-carry_0-10_seed2025_v1.pdf
 ---
 
 ### 使用说明（你这边本地）
-
-```bash
-# 安装依赖
-pnpm i
-
-# 生成题面与答案，再编译 PDF
-pnpm gen -- --count 24 --min 0 --max 10 --noCarry --seed 2025
-pnpm build
-
-# 或一条命令：
-pnpm gen -- --count 24 --min 0 --max 10 --noCarry --seed 2025 && pnpm build
+根据worksheet-config.json来生成pdf，index代表第几个配置，count代表生成的份数
 ```
-
-生成结果会在：
-
+pnpm generate:all --index 2 --count 5
 ```
-dist/addition_no-carry_0-10_seed2025_v1.pdf
-```
-

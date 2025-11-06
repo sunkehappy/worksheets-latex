@@ -1,0 +1,65 @@
+{
+  "worksheets": [
+    {
+      "type": "text",
+      "name": "Addition Basic 0-10",
+      "outputPath": "grade-1/adding/addition-basic",
+      "params": {
+        "count": 24,
+        "min": 0,
+        "max": 10,
+        "noCarry": false,
+        "allowZeroSingle": false,
+        "seed": 2025,
+        "version": "v1"
+      }
+    },
+    {
+      "type": "text",
+      "name": "Addition No Carry 0-10",
+      "outputPath": "grade-1/adding/addition-no-carry",
+      "params": {
+        "count": 7,
+        "min": 0,
+        "max": 10,
+        "noCarry": true,
+        "allowZeroSingle": false,
+        "seed": 2025,
+        "version": "v1"
+      }
+    },
+    {
+      "type": "pictures",
+      "name": "Addition with Pictures up to 10",
+      "outputPath": "grade-1/adding/adding-with-pictures",
+      "params": {
+        "count": 9,
+        "min": 1,
+        "max": 5,
+        "allowZeroSingle": false,
+        "sameIconOnly": true,
+        "seed": 2025,
+        "perRow": 5,
+        "version": "v1",
+        "singleLine": true
+      }
+    },
+    {
+      "type": "pictures",
+      "name": "Addition with Pictures up to 20",
+      "outputPath": "grade-1/adding/adding-with-pictures",
+      "params": {
+        "count": 7,
+        "min": 1,
+        "max": 10,
+        "allowZeroSingle": false,
+        "sameIconOnly": true,
+        "seed": 2025,
+        "perRow": 5,
+        "version": "v1",
+        "singleLine": true
+      }
+    }
+  ]
+}
+

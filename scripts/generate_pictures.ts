@@ -15,6 +15,7 @@ type Params = {
   perRow?: number;          // 每行最多多少图标，超出自动换行
   version?: string;
   singleLine?: boolean;     // 是否使用一行一个算式的格式（左边图形，右边空白算式）
+  name?: string;            // worksheet name from config
 };
 
 function rng(seed: number) {
@@ -94,7 +95,10 @@ function toSingleLineTex(problems: Problem[], perRow?: number): string {
 }
 
 function toAnswersTex(problems: Problem[]): string {
-  return problems.map(q => `\\item ${q.left} + ${q.right} = ${q.left + q.right}`).join("\n");
+  // 答案页仅显示数字算式，一行一个，不包含图形
+  return problems
+    .map(q => `\\item {\\Large ${q.left} + ${q.right} = ${q.left + q.right}}`)
+    .join("\n");
 }
 
 function main() {
@@ -115,6 +119,7 @@ function main() {
     perRow: argv.perRow !== undefined ? Number(argv.perRow) : 5,
     version: String(argv.version ?? "v1"),
     singleLine: Boolean(argv.singleLine ?? true),  // 默认使用一行一个算式的格式
+    name: argv.name ? String(argv.name) : undefined,  // 从命令行参数读取 name（由 generate_all.ts 传递）
   };
 
   const problems = generate(params);
@@ -136,7 +141,8 @@ function main() {
     seed: actualSeed,
     perRow: params.perRow,
     sameIconOnly: params.sameIconOnly,
-    version: params.version
+    version: params.version,
+    name: params.name // 保存配置中的 name
   };
   fs.writeFileSync("generated/build_meta_pictures.json", JSON.stringify(meta));
   console.log("Generated: problems_pictures.tex, answers_pictures.tex, build_meta_pictures.json");

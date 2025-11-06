@@ -110,6 +110,24 @@
   \endgroup
 }
 
+% ===== 答案版：左边图形，右边直接显示数字算式 =====
+% \WSPictureAddEquationSolved{nameL}{nL}{nameR}{nR}{perRow}
+\def\WSPictureAddEquationSolved#1#2#3#4#5{%
+  \begingroup
+  \setlength{\arrayrulewidth}{0pt}%
+  \renewcommand{\arraystretch}{1}%
+  \begin{tabular*}{\linewidth}{@{}>{\raggedright\arraybackslash}m{0.27\linewidth}@{\hspace{0em}}>{\centering\arraybackslash}m{0.08\linewidth}@{\hspace{0em}}>{\raggedright\arraybackslash}m{0.27\linewidth}@{\extracolsep{\fill}}>{\raggedleft\arraybackslash}m{0.30\linewidth}@{}}
+    \WSPictureAddIconsWrapLarge{#1}{#2}{#5}%
+    &
+    {\LARGE\, + \,}%
+    &
+    \WSPictureAddIconsWrapLarge{#3}{#4}{#5}%
+    &
+    {\LARGE\ #2\ \,+\ \,#4\ \;=\ \;\fpeval{#2 + #4}}%
+  \end{tabular*}%
+  \endgroup
+}
+
 % ===== 图形换行版本（用于算式，换行后左对齐，尺寸调小以便对齐） =====
 \def\WSPictureAddIconsWrapLarge#1#2#3{%
   \def\c{#2}%

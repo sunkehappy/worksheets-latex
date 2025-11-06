@@ -11,6 +11,7 @@ type Params = {
   allowZeroSingle?: boolean; // allow 0 in either operand
   seed?: number;
   version?: string;     // for output name tagging, default "v1"
+  name?: string;        // worksheet name from config
 };
 
 function rng(seed: number) {
@@ -55,7 +56,7 @@ function toTwoColumnTex(problems: Problem[]): string {
 
 function toAnswersTex(problems: Problem[]): string {
   return problems
-    .map((q) => `\\item ${q.left} + ${q.right} = ${q.left + q.right}`)
+    .map((q) => `\\item {\\Large ${q.left} + ${q.right} = ${q.left + q.right}}`)
     .join("\n");
 }
 
@@ -74,7 +75,8 @@ function main() {
     noCarry: Boolean(argv.noCarry ?? false),
     allowZeroSingle: Boolean(argv.allowZeroSingle ?? false),
     seed: argv.seed !== undefined ? Number(argv.seed) : undefined,
-    version: String(argv.version ?? "v1")
+    version: String(argv.version ?? "v1"),
+    name: argv.name ? String(argv.name) : undefined,  // 从命令行参数读取 name（由 generate_all.ts 传递）
   };
 
   if (Number.isNaN(p.count) || Number.isNaN(p.min) || Number.isNaN(p.max)) {
@@ -101,7 +103,8 @@ function main() {
     range: `${p.min}-${p.max}`,
     seed: actualSeed,
     noCarry: !!p.noCarry,
-    version: p.version
+    version: p.version,
+    name: p.name // 保存配置中的 name
   };
 
   fs.writeFileSync("generated/build_meta.json", JSON.stringify(meta, null, 2));
