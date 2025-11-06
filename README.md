@@ -70,7 +70,8 @@ dist/addition_no-carry_0-10_seed2025_v1.pdf
 ---
 
 ### 使用说明（你这边本地）
-根据worksheet-config.json来生成pdf，index代表第几个配置，count代表生成的份数
+根据worksheet-config.json来生成pdf，index代表第几个配置，count代表生成的份数。
+比如生成图片加法10以内
 ```
 pnpm generate:all --index 2 --count 5
 ```

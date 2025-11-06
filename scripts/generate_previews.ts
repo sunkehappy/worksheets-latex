@@ -82,29 +82,33 @@ function main() {
   console.log(`Found ${pdfFiles.length} PDF file(s)\n`);
   
   // 第一步：生成所有缺失的预览图
-  const previewsToCompress: string[] = [];
+  const newPreviews: string[] = [];
   
   for (const pdfPath of pdfFiles) {
     const previewPath = pdfPath.replace(/\.pdf$/i, '.preview.png');
     const existed = fs.existsSync(previewPath);
     
-    generatePreview(pdfPath);
-    
-    // 记录需要压缩的文件（包括新生成的和已存在的）
-    if (fs.existsSync(previewPath)) {
-      previewsToCompress.push(previewPath);
+    if (!existed) {
+      generatePreview(pdfPath);
+      // 只记录新生成的预览图，用于后续压缩
+      if (fs.existsSync(previewPath)) {
+        newPreviews.push(previewPath);
+      }
+    } else {
+      console.log(`⏭️  Skip (already exists): ${path.basename(pdfPath)}`);
     }
   }
   
-  // 第二步：压缩所有预览图
-  if (previewsToCompress.length > 0) {
-    console.log(`\n🗜️  Compressing ${previewsToCompress.length} preview image(s)...\n`);
-    for (const pngPath of previewsToCompress) {
+  // 第二步：只压缩新生成的预览图
+  if (newPreviews.length > 0) {
+    console.log(`\n🗜️  Compressing ${newPreviews.length} new preview image(s)...\n`);
+    for (const pngPath of newPreviews) {
       compressPng(pngPath);
     }
+    console.log("\n✨ All previews generated and compressed!");
+  } else {
+    console.log("\n✨ All previews are up to date!");
   }
-  
-  console.log("\n✨ All previews generated and compressed!");
 }
 
 main();
