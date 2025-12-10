@@ -152,6 +152,183 @@
 \@ifpackageloaded{tikz}{}{\usepackage{tikz}}
 \@ifpackageloaded{xfp}{}{\usepackage{xfp}}
 
+% ===== 数字线相关宏 =====
+% 基础数字线（0-maxValue，带刻度）
+% 根据maxValue自动调整缩放比例
+% \WSNumberLine{maxValue}
+\def\WSNumberLine#1{%
+  \ifnum#1>15
+    \def\scalevalue{0.85}%
+    \pgfmathsetmacro{\unitwidth}{0.7}%
+  \else
+    \ifnum#1>10
+      \def\scalevalue{0.95}%
+      \pgfmathsetmacro{\unitwidth}{0.75}%
+    \else
+      \def\scalevalue{1.0}%
+      \pgfmathsetmacro{\unitwidth}{0.7}%
+    \fi
+  \fi
+  \begin{tikzpicture}[scale=\scalevalue, baseline=-0.5ex]
+    % 绘制水平线
+    \pgfmathsetmacro{\maxx}{#1*\unitwidth+0.5*\unitwidth}%
+    \pgfmathsetmacro{\arrowx}{#1*\unitwidth+\unitwidth}%
+    \draw[->] (0,0) -- (\maxx,0);
+    \draw[<-] (\maxx,0) -- (\arrowx,0);
+    % 绘制刻度线和数字
+    \foreach \x in {0,1,...,#1} {
+      \pgfmathsetmacro{\xpos}{\x*\unitwidth}%
+      \draw (\xpos,0.1) -- (\xpos,-0.1);
+      \node[below] at (\xpos,-0.2) {\small \x};
+    }
+  \end{tikzpicture}%
+}
+
+% 带弧线的数字线（示例：显示从0到first，然后从first到result）
+% \WSNumberLineWithArcs{first}{second}{result}{maxValue}
+\def\WSNumberLineWithArcs#1#2#3#4{%
+  \ifnum#4>15
+    \def\scalevalue{0.8}%
+    \pgfmathsetmacro{\unitwidth}{0.65}%
+  \else
+    \ifnum#4>10
+      \def\scalevalue{0.9}%
+      \pgfmathsetmacro{\unitwidth}{0.7}%
+    \else
+      \def\scalevalue{1.0}%
+      \pgfmathsetmacro{\unitwidth}{0.7}%
+    \fi
+  \fi
+  % 预先计算控制点坐标
+  \pgfmathsetmacro{\firstx}{#1*\unitwidth}%
+  \pgfmathsetmacro{\resultx}{#3*\unitwidth}%
+  \pgfmathsetmacro{\firstctrlone}{\firstx*0.3}%
+  \pgfmathsetmacro{\firstctrltwo}{\firstx*0.7}%
+  \pgfmathsetmacro{\secondctrlone}{\firstx+(\resultx-\firstx)*0.3}%
+  \pgfmathsetmacro{\secondctrltwo}{\firstx+(\resultx-\firstx)*0.7}%
+  \begin{tikzpicture}[scale=\scalevalue, baseline=-0.5ex]
+    % 绘制水平线
+    \pgfmathsetmacro{\maxx}{#4*\unitwidth+0.5*\unitwidth}%
+    \pgfmathsetmacro{\arrowx}{#4*\unitwidth+\unitwidth}%
+    \draw[->] (0,0) -- (\maxx,0);
+    \draw[<-] (\maxx,0) -- (\arrowx,0);
+    % 绘制刻度线和数字
+    \foreach \x in {0,1,...,#4} {
+      \pgfmathsetmacro{\xpos}{\x*\unitwidth}%
+      \draw (\xpos,0.1) -- (\xpos,-0.1);
+      \node[below] at (\xpos,-0.2) {\small \x};
+    }
+    % 绘制第一个弧线（从0到first）
+    \draw[thick,->,red] (0,0) .. controls (\firstctrlone,0.8) and (\firstctrltwo,0.8) .. (\firstx,0);
+    % 绘制第二个弧线（从first到result）
+    \draw[thick,->,red] (\firstx,0) .. controls (\secondctrlone,0.6) and (\secondctrltwo,0.6) .. (\resultx,0);
+  \end{tikzpicture}%
+}
+
+% 空白数字线（练习题：画红色弧线表示几加几）
+% \WSNumberLineBlank{first}{second}{maxValue}
+\def\WSNumberLineBlank#1#2#3{%
+  \ifnum#3>15
+    \def\scalevalue{0.8}%
+    \pgfmathsetmacro{\unitwidth}{0.65}%
+  \else
+    \ifnum#3>10
+      \def\scalevalue{0.9}%
+      \pgfmathsetmacro{\unitwidth}{0.7}%
+    \else
+      \def\scalevalue{1.0}%
+      \pgfmathsetmacro{\unitwidth}{0.7}%
+    \fi
+  \fi
+  % 计算结果
+  \pgfmathsetmacro{\result}{#1+#2}%
+  % 预先计算控制点坐标
+  \pgfmathsetmacro{\firstx}{#1*\unitwidth}%
+  \pgfmathsetmacro{\resultx}{\result*\unitwidth}%
+  \pgfmathsetmacro{\firstctrlone}{\firstx*0.3}%
+  \pgfmathsetmacro{\firstctrltwo}{\firstx*0.7}%
+  \pgfmathsetmacro{\secondctrlone}{\firstx+(\resultx-\firstx)*0.3}%
+  \pgfmathsetmacro{\secondctrltwo}{\firstx+(\resultx-\firstx)*0.7}%
+  \begin{tikzpicture}[scale=\scalevalue, baseline=-0.5ex]
+    % 绘制水平线
+    \pgfmathsetmacro{\maxx}{#3*\unitwidth+0.5*\unitwidth}%
+    \pgfmathsetmacro{\arrowx}{#3*\unitwidth+\unitwidth}%
+    \draw[->] (0,0) -- (\maxx,0);
+    \draw[<-] (\maxx,0) -- (\arrowx,0);
+    % 绘制刻度线和数字
+    \foreach \x in {0,1,...,#3} {
+      \pgfmathsetmacro{\xpos}{\x*\unitwidth}%
+      \draw (\xpos,0.1) -- (\xpos,-0.1);
+      \node[below] at (\xpos,-0.2) {\small \x};
+    }
+    % 绘制第一个弧线（从0到first）
+    \draw[thick,->,red] (0,0) .. controls (\firstctrlone,0.8) and (\firstctrltwo,0.8) .. (\firstx,0);
+    % 绘制第二个弧线（从first到result）
+    \draw[thick,->,red] (\firstx,0) .. controls (\secondctrlone,0.6) and (\secondctrltwo,0.6) .. (\resultx,0);
+  \end{tikzpicture}%
+}
+
+% 数字线加法题目（一行一个：左边数字线，右边空白算式）
+% \WSNumberLineAddEquation{first}{second}{maxValue}
+\def\WSNumberLineAddEquation#1#2#3{%
+  \begingroup
+  \setlength{\arrayrulewidth}{0pt}%
+  \renewcommand{\arraystretch}{1}%
+  \begin{tabular*}{\linewidth}{@{}>{\centering\arraybackslash}m{0.58\linewidth}@{\hspace{0.02\linewidth}}>{\raggedleft\arraybackslash}m{0.38\linewidth}@{}}
+    \WSNumberLineBlank{#1}{#2}{#3}%
+    &
+    \raisebox{-3.5pt}{\rule{30pt}{1pt}}\hspace{0.1em}{\LARGE\, + \,}\hspace{0.1em}%
+    \raisebox{-3.5pt}{\rule{30pt}{1pt}}\hspace{0.1em}{\LARGE\, = \,}\hspace{0.1em}%
+    \raisebox{-3.5pt}{\rule{30pt}{1pt}}%
+  \end{tabular*}%
+  \endgroup
+}
+
+% 数字+下划线的组合（用于样例）
+% \WSNumberWithUnderline{number}
+\def\WSNumberWithUnderline#1{%
+  \raisebox{-3.5pt}{%
+    \hbox to 30pt{%
+      \hfil
+      \vbox{%
+        \hbox{\LARGE\ #1}%
+        \hbox{\rule{30pt}{1pt}}%
+      }%
+      \hfil
+    }%
+  }%
+}
+
+% 数字线加法示例（带弧线）
+% \WSNumberLineAddExample{first}{second}{result}{maxValue}
+\def\WSNumberLineAddExample#1#2#3#4{%
+  \begingroup
+  \setlength{\arrayrulewidth}{0pt}%
+  \renewcommand{\arraystretch}{1}%
+  \begin{tabular*}{\linewidth}{@{}>{\centering\arraybackslash}m{0.58\linewidth}@{\hspace{0.02\linewidth}}>{\raggedleft\arraybackslash}m{0.38\linewidth}@{}}
+    \WSNumberLineWithArcs{#1}{#2}{#3}{#4}%
+    &
+    \WSNumberWithUnderline{#1}\hspace{0.1em}{\LARGE\, + \,}\hspace{0.1em}%
+    \WSNumberWithUnderline{#2}\hspace{0.1em}{\LARGE\, = \,}\hspace{0.1em}%
+    \WSNumberWithUnderline{#3}%
+  \end{tabular*}%
+  \endgroup
+}
+
+% 数字线加法题目（空数字线，右边显示计算式让学生画线）
+% \WSNumberLineAddDraw{first}{second}{maxValue}
+\def\WSNumberLineAddDraw#1#2#3{%
+  \begingroup
+  \setlength{\arrayrulewidth}{0pt}%
+  \renewcommand{\arraystretch}{1}%
+  \begin{tabular*}{\linewidth}{@{}>{\centering\arraybackslash}m{0.58\linewidth}@{\hspace{0.02\linewidth}}>{\raggedleft\arraybackslash}m{0.38\linewidth}@{}}
+    \WSNumberLine{#3}%
+    &
+    {\LARGE\ #1\ \,+\ \,#2\ \;=\ \;}\raisebox{-3.5pt}{\rule{30pt}{1pt}}%
+  \end{tabular*}%
+  \endgroup
+}
+
 % Backward-compatible aliases (define only if currently undefined)
 \@ifundefined{PictureAddIcons}{\def\PictureAddIcons#1#2#3#4{\WSPictureAddIcons{#1}{#2}{#3}{#4}}}{}
 \@ifundefined{PictureAddIcons2L}{\def\PictureAddIcons2L#1#2#3#4#5{\WSPictureAddIcons2L{#1}{#2}{#3}{#4}{#5}}}{}

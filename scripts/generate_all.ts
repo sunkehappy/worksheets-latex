@@ -29,18 +29,30 @@ type PicturesParams = {
   name?: string;  // worksheet name from config
 };
 
+type NumberLinesParams = {
+  count: number;
+  min: number;
+  max: number;
+  allowZeroSingle?: boolean;
+  seed?: number;
+  maxValue?: number;
+  version?: string;
+  name?: string;  // worksheet name from config
+  showExample?: boolean;
+};
+
 type WorksheetConfig = {
-  type: "text" | "pictures";
+  type: "text" | "pictures" | "number-lines-filled" | "number-lines-empty";
   name: string;
   outputPath?: string;
-  params: TextParams | PicturesParams;
+  params: TextParams | PicturesParams | NumberLinesParams;
 };
 
 type ConfigFile = {
   worksheets: WorksheetConfig[];
 };
 
-function buildArgs(params: TextParams | PicturesParams): string[] {
+function buildArgs(params: TextParams | PicturesParams | NumberLinesParams): string[] {
   const args: string[] = [];
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null) {
@@ -122,6 +134,72 @@ function generatePictures(params: PicturesParams, name: string, count: number = 
   }
 }
 
+function generateNumberLinesFilled(params: NumberLinesParams, name: string, count: number = 1, outputPath?: string): void {
+  console.log(`\n📊 Generating: ${name}${count > 1 ? ` (${count} copies with different content)` : ""}`);
+  const baseSeed = params.seed || 2025;
+  try {
+    // 生成多份 PDF，每份使用不同的 seed（原始 seed + 序号）
+    for (let i = 1; i <= count; i++) {
+      const suffix = i.toString().padStart(2, '0');
+      const newSeed = baseSeed * 100 + i;
+      console.log(`  Generating copy ${suffix}/${count.toString().padStart(2, '0')} (seed: ${newSeed})...`);
+      
+      // 为每份生成新的 problems/answers（使用不同的 seed）
+      const newParams = { ...params, seed: newSeed, name: name };
+      const args = buildArgs(newParams);
+      // 使用 spawnSync 数组形式避免 shell 解析带空格参数的问题
+      const result = spawnSync("ts-node", ["scripts/generate_number_lines_filled.ts", "--", ...args], {
+        stdio: "inherit",
+      });
+      if (result.error || result.status !== 0) {
+        throw result.error || new Error(`Process exited with code ${result.status}`);
+      }
+      
+      // 立即编译，传递输出路径
+      const buildCmdArgs = outputPath 
+        ? `-- --suffix ${suffix} --outputPath "${outputPath}"`
+        : `-- --suffix ${suffix}`;
+      execSync(`ts-node scripts/build_number_lines_filled.ts ${buildCmdArgs}`, { stdio: "inherit" });
+    }
+    console.log(`✅ Completed: ${name} (${count} copy/copies)`);
+  } catch (error) {
+    console.error(`❌ Failed: ${name}`, error);
+  }
+}
+
+function generateNumberLinesEmpty(params: NumberLinesParams, name: string, count: number = 1, outputPath?: string): void {
+  console.log(`\n📊 Generating: ${name}${count > 1 ? ` (${count} copies with different content)` : ""}`);
+  const baseSeed = params.seed || 2025;
+  try {
+    // 生成多份 PDF，每份使用不同的 seed（原始 seed + 序号）
+    for (let i = 1; i <= count; i++) {
+      const suffix = i.toString().padStart(2, '0');
+      const newSeed = baseSeed * 100 + i;
+      console.log(`  Generating copy ${suffix}/${count.toString().padStart(2, '0')} (seed: ${newSeed})...`);
+      
+      // 为每份生成新的 problems/answers（使用不同的 seed）
+      const newParams = { ...params, seed: newSeed, name: name };
+      const args = buildArgs(newParams);
+      // 使用 spawnSync 数组形式避免 shell 解析带空格参数的问题
+      const result = spawnSync("ts-node", ["scripts/generate_number_lines_empty.ts", "--", ...args], {
+        stdio: "inherit",
+      });
+      if (result.error || result.status !== 0) {
+        throw result.error || new Error(`Process exited with code ${result.status}`);
+      }
+      
+      // 立即编译，传递输出路径
+      const buildCmdArgs = outputPath 
+        ? `-- --suffix ${suffix} --outputPath "${outputPath}"`
+        : `-- --suffix ${suffix}`;
+      execSync(`ts-node scripts/build_number_lines_empty.ts ${buildCmdArgs}`, { stdio: "inherit" });
+    }
+    console.log(`✅ Completed: ${name} (${count} copy/copies)`);
+  } catch (error) {
+    console.error(`❌ Failed: ${name}`, error);
+  }
+}
+
 function main() {
   // 处理命令行参数
   let args = process.argv.slice(2);
@@ -151,7 +229,7 @@ function main() {
     console.log("\nUsage:");
     console.log("  pnpm generate:all                    # Generate all");
     console.log("  pnpm generate:all --name <name>      # Generate by name");
-    console.log("  pnpm generate:all --type <type>      # Generate by type (text/pictures)");
+    console.log("  pnpm generate:all --type <type>      # Generate by type (text/pictures/number-lines-filled/number-lines-empty)");
     console.log("  pnpm generate:all --index <n>        # Generate by index");
     console.log("  pnpm generate:all --count <n>        # Generate n copies (same content)");
     console.log("  pnpm generate:all --name <name> --count 3  # Generate 3 copies of matching worksheets");
@@ -209,6 +287,10 @@ function main() {
       generateText(worksheet.params as TextParams, worksheet.name, count, worksheet.outputPath);
     } else if (worksheet.type === "pictures") {
       generatePictures(worksheet.params as PicturesParams, worksheet.name, count, worksheet.outputPath);
+    } else if (worksheet.type === "number-lines-filled") {
+      generateNumberLinesFilled(worksheet.params as NumberLinesParams, worksheet.name, count, worksheet.outputPath);
+    } else if (worksheet.type === "number-lines-empty") {
+      generateNumberLinesEmpty(worksheet.params as NumberLinesParams, worksheet.name, count, worksheet.outputPath);
     } else {
       console.warn(`⚠️  Unknown worksheet type: ${worksheet.type}`);
     }

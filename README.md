@@ -75,3 +75,7 @@ dist/addition_no-carry_0-10_seed2025_v1.pdf
 ```
 pnpm generate:all --index 2 --count 5
 ```
+或者生成数字线的
+```
+pnpm generate:all --type number-lines
+```
