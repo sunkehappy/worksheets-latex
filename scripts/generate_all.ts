@@ -41,18 +41,71 @@ type NumberLinesParams = {
   showExample?: boolean;
 };
 
+type SubtractionParams = {
+  count: number;
+  min: number;
+  max: number;
+  allowZeroSingle?: boolean;
+  seed?: number;
+  version?: string;
+  name?: string;  // worksheet name from config
+};
+
+type WholeTensAddParams = {
+  count: number;
+  minTens: number;
+  maxTens: number;
+  seed?: number;
+  version?: string;
+  name?: string;
+};
+
+type WholeTensMissingParams = {
+  count: number;
+  minTens: number;
+  maxTens: number;
+  seed?: number;
+  version?: string;
+  name?: string;
+};
+
+type Add2Digit1DigitParams = {
+  count: number;
+  min2Digit: number;
+  max2Digit: number;
+  min1Digit: number;
+  max1Digit: number;
+  seed?: number;
+  version?: string;
+  name?: string;
+};
+
+type Add2Digit1DigitMissingParams = {
+  count: number;
+  min2Digit: number;
+  max2Digit: number;
+  min1Digit: number;
+  max1Digit: number;
+  seed?: number;
+  version?: string;
+  name?: string;
+};
+
 type WorksheetConfig = {
-  type: "text" | "pictures" | "number-lines-filled" | "number-lines-empty";
+  type: "text" | "pictures" | "number-lines-filled" | "number-lines-empty" | "subtraction" | 
+        "whole-tens-add" | "whole-tens-missing" | "add-2digit-1digit" | "add-2digit-1digit-missing";
   name: string;
   outputPath?: string;
-  params: TextParams | PicturesParams | NumberLinesParams;
+  params: TextParams | PicturesParams | NumberLinesParams | SubtractionParams | 
+          WholeTensAddParams | WholeTensMissingParams | Add2Digit1DigitParams | Add2Digit1DigitMissingParams;
 };
 
 type ConfigFile = {
   worksheets: WorksheetConfig[];
 };
 
-function buildArgs(params: TextParams | PicturesParams | NumberLinesParams): string[] {
+function buildArgs(params: TextParams | PicturesParams | NumberLinesParams | SubtractionParams | 
+                   WholeTensAddParams | WholeTensMissingParams | Add2Digit1DigitParams | Add2Digit1DigitMissingParams): string[] {
   const args: string[] = [];
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null) {
@@ -200,6 +253,155 @@ function generateNumberLinesEmpty(params: NumberLinesParams, name: string, count
   }
 }
 
+function generateSubtraction(params: SubtractionParams, name: string, count: number = 1, outputPath?: string): void {
+  console.log(`\n➖ Generating: ${name}${count > 1 ? ` (${count} copies with different content)` : ""}`);
+  const baseSeed = params.seed || 2025;
+  try {
+    // 生成多份 PDF，每份使用不同的 seed（原始 seed + 序号）
+    for (let i = 1; i <= count; i++) {
+      const suffix = i.toString().padStart(2, '0');
+      const newSeed = baseSeed * 100 + i;
+      console.log(`  Generating copy ${suffix}/${count.toString().padStart(2, '0')} (seed: ${newSeed})...`);
+      
+      // 为每份生成新的 problems/answers（使用不同的 seed）
+      const newParams = { ...params, seed: newSeed, name: name };
+      const args = buildArgs(newParams);
+      // 使用 spawnSync 数组形式避免 shell 解析带空格参数的问题
+      const result = spawnSync("ts-node", ["scripts/generate_subtraction.ts", "--", ...args], {
+        stdio: "inherit",
+      });
+      if (result.error || result.status !== 0) {
+        throw result.error || new Error(`Process exited with code ${result.status}`);
+      }
+      
+      // 立即编译，传递输出路径
+      const buildCmdArgs = outputPath 
+        ? `-- --suffix ${suffix} --outputPath "${outputPath}"`
+        : `-- --suffix ${suffix}`;
+      execSync(`ts-node scripts/build_subtraction.ts ${buildCmdArgs}`, { stdio: "inherit" });
+    }
+    console.log(`✅ Completed: ${name} (${count} copy/copies)`);
+  } catch (error) {
+    console.error(`❌ Failed: ${name}`, error);
+  }
+}
+
+function generateWholeTensAdd(params: WholeTensAddParams, name: string, count: number = 1, outputPath?: string): void {
+  console.log(`\n➕ Generating: ${name}${count > 1 ? ` (${count} copies with different content)` : ""}`);
+  const baseSeed = params.seed || 2025;
+  try {
+    for (let i = 1; i <= count; i++) {
+      const suffix = i.toString().padStart(2, '0');
+      const newSeed = baseSeed * 100 + i;
+      console.log(`  Generating copy ${suffix}/${count.toString().padStart(2, '0')} (seed: ${newSeed})...`);
+      
+      const newParams = { ...params, seed: newSeed, name: name };
+      const args = buildArgs(newParams);
+      const result = spawnSync("ts-node", ["scripts/generate_whole_tens_add.ts", "--", ...args], {
+        stdio: "inherit",
+      });
+      if (result.error || result.status !== 0) {
+        throw result.error || new Error(`Process exited with code ${result.status}`);
+      }
+      
+      const buildCmdArgs = outputPath 
+        ? `-- --suffix ${suffix} --outputPath "${outputPath}"`
+        : `-- --suffix ${suffix}`;
+      execSync(`ts-node scripts/build_whole_tens_add.ts ${buildCmdArgs}`, { stdio: "inherit" });
+    }
+    console.log(`✅ Completed: ${name} (${count} copy/copies)`);
+  } catch (error) {
+    console.error(`❌ Failed: ${name}`, error);
+  }
+}
+
+function generateWholeTensMissing(params: WholeTensMissingParams, name: string, count: number = 1, outputPath?: string): void {
+  console.log(`\n➕ Generating: ${name}${count > 1 ? ` (${count} copies with different content)` : ""}`);
+  const baseSeed = params.seed || 2025;
+  try {
+    for (let i = 1; i <= count; i++) {
+      const suffix = i.toString().padStart(2, '0');
+      const newSeed = baseSeed * 100 + i;
+      console.log(`  Generating copy ${suffix}/${count.toString().padStart(2, '0')} (seed: ${newSeed})...`);
+      
+      const newParams = { ...params, seed: newSeed, name: name };
+      const args = buildArgs(newParams);
+      const result = spawnSync("ts-node", ["scripts/generate_whole_tens_missing.ts", "--", ...args], {
+        stdio: "inherit",
+      });
+      if (result.error || result.status !== 0) {
+        throw result.error || new Error(`Process exited with code ${result.status}`);
+      }
+      
+      const buildCmdArgs = outputPath 
+        ? `-- --suffix ${suffix} --outputPath "${outputPath}"`
+        : `-- --suffix ${suffix}`;
+      execSync(`ts-node scripts/build_whole_tens_missing.ts ${buildCmdArgs}`, { stdio: "inherit" });
+    }
+    console.log(`✅ Completed: ${name} (${count} copy/copies)`);
+  } catch (error) {
+    console.error(`❌ Failed: ${name}`, error);
+  }
+}
+
+function generateAdd2Digit1Digit(params: Add2Digit1DigitParams, name: string, count: number = 1, outputPath?: string): void {
+  console.log(`\n➕ Generating: ${name}${count > 1 ? ` (${count} copies with different content)` : ""}`);
+  const baseSeed = params.seed || 2025;
+  try {
+    for (let i = 1; i <= count; i++) {
+      const suffix = i.toString().padStart(2, '0');
+      const newSeed = baseSeed * 100 + i;
+      console.log(`  Generating copy ${suffix}/${count.toString().padStart(2, '0')} (seed: ${newSeed})...`);
+      
+      const newParams = { ...params, seed: newSeed, name: name };
+      const args = buildArgs(newParams);
+      const result = spawnSync("ts-node", ["scripts/generate_add_2digit_1digit.ts", "--", ...args], {
+        stdio: "inherit",
+      });
+      if (result.error || result.status !== 0) {
+        throw result.error || new Error(`Process exited with code ${result.status}`);
+      }
+      
+      const buildCmdArgs = outputPath 
+        ? `-- --suffix ${suffix} --outputPath "${outputPath}"`
+        : `-- --suffix ${suffix}`;
+      execSync(`ts-node scripts/build_add_2digit_1digit.ts ${buildCmdArgs}`, { stdio: "inherit" });
+    }
+    console.log(`✅ Completed: ${name} (${count} copy/copies)`);
+  } catch (error) {
+    console.error(`❌ Failed: ${name}`, error);
+  }
+}
+
+function generateAdd2Digit1DigitMissing(params: Add2Digit1DigitMissingParams, name: string, count: number = 1, outputPath?: string): void {
+  console.log(`\n➕ Generating: ${name}${count > 1 ? ` (${count} copies with different content)` : ""}`);
+  const baseSeed = params.seed || 2025;
+  try {
+    for (let i = 1; i <= count; i++) {
+      const suffix = i.toString().padStart(2, '0');
+      const newSeed = baseSeed * 100 + i;
+      console.log(`  Generating copy ${suffix}/${count.toString().padStart(2, '0')} (seed: ${newSeed})...`);
+      
+      const newParams = { ...params, seed: newSeed, name: name };
+      const args = buildArgs(newParams);
+      const result = spawnSync("ts-node", ["scripts/generate_add_2digit_1digit_missing.ts", "--", ...args], {
+        stdio: "inherit",
+      });
+      if (result.error || result.status !== 0) {
+        throw result.error || new Error(`Process exited with code ${result.status}`);
+      }
+      
+      const buildCmdArgs = outputPath 
+        ? `-- --suffix ${suffix} --outputPath "${outputPath}"`
+        : `-- --suffix ${suffix}`;
+      execSync(`ts-node scripts/build_add_2digit_1digit_missing.ts ${buildCmdArgs}`, { stdio: "inherit" });
+    }
+    console.log(`✅ Completed: ${name} (${count} copy/copies)`);
+  } catch (error) {
+    console.error(`❌ Failed: ${name}`, error);
+  }
+}
+
 function main() {
   // 处理命令行参数
   let args = process.argv.slice(2);
@@ -229,7 +431,7 @@ function main() {
     console.log("\nUsage:");
     console.log("  pnpm generate:all                    # Generate all");
     console.log("  pnpm generate:all --name <name>      # Generate by name");
-    console.log("  pnpm generate:all --type <type>      # Generate by type (text/pictures/number-lines-filled/number-lines-empty)");
+    console.log("  pnpm generate:all --type <type>      # Generate by type (text/pictures/number-lines-filled/number-lines-empty/subtraction)");
     console.log("  pnpm generate:all --index <n>        # Generate by index");
     console.log("  pnpm generate:all --count <n>        # Generate n copies (same content)");
     console.log("  pnpm generate:all --name <name> --count 3  # Generate 3 copies of matching worksheets");
@@ -291,6 +493,16 @@ function main() {
       generateNumberLinesFilled(worksheet.params as NumberLinesParams, worksheet.name, count, worksheet.outputPath);
     } else if (worksheet.type === "number-lines-empty") {
       generateNumberLinesEmpty(worksheet.params as NumberLinesParams, worksheet.name, count, worksheet.outputPath);
+    } else if (worksheet.type === "subtraction") {
+      generateSubtraction(worksheet.params as SubtractionParams, worksheet.name, count, worksheet.outputPath);
+    } else if (worksheet.type === "whole-tens-add") {
+      generateWholeTensAdd(worksheet.params as WholeTensAddParams, worksheet.name, count, worksheet.outputPath);
+    } else if (worksheet.type === "whole-tens-missing") {
+      generateWholeTensMissing(worksheet.params as WholeTensMissingParams, worksheet.name, count, worksheet.outputPath);
+    } else if (worksheet.type === "add-2digit-1digit") {
+      generateAdd2Digit1Digit(worksheet.params as Add2Digit1DigitParams, worksheet.name, count, worksheet.outputPath);
+    } else if (worksheet.type === "add-2digit-1digit-missing") {
+      generateAdd2Digit1DigitMissing(worksheet.params as Add2Digit1DigitMissingParams, worksheet.name, count, worksheet.outputPath);
     } else {
       console.warn(`⚠️  Unknown worksheet type: ${worksheet.type}`);
     }

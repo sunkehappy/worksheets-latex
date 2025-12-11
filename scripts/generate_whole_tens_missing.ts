@@ -1,14 +1,12 @@
 import fs from "node:fs";
 import minimist from "minimist";
 
-type Problem = { left: number; right: number };
+type Problem = { left: number; right: number; sum: number; missingPosition: "left" | "right" };
 
 type Params = {
   count: number;        // number of problems
-  min: number;          // min operand (inclusive)
-  max: number;          // max operand (inclusive)
-  noCarry?: boolean;    // if true, forbid carry (units place sum < 10)
-  allowZeroSingle?: boolean; // allow 0 in either operand
+  minTens: number;      // min tens (e.g., 1 means 10, 9 means 90)
+  maxTens: number;      // max tens (e.g., 1 means 10, 9 means 90)
   seed?: number;
   version?: string;     // for output name tagging, default "v1"
   name?: string;        // worksheet name from config
@@ -26,13 +24,16 @@ function generate(p: Params): Problem[] {
   const out: Problem[] = [];
 
   while (out.length < p.count) {
-    const a = Math.floor(r() * (p.max - p.min + 1)) + p.min;
-    const b = Math.floor(r() * (p.max - p.min + 1)) + p.min;
+    const tensA = Math.floor(r() * (p.maxTens - p.minTens + 1)) + p.minTens;
+    const tensB = Math.floor(r() * (p.maxTens - p.minTens + 1)) + p.minTens;
+    const a = tensA * 10;
+    const b = tensB * 10;
+    const sum = a + b;
+    
+    // Randomly choose which operand is missing
+    const missingPosition = r() < 0.5 ? "left" : "right";
 
-    if (!p.allowZeroSingle && (a === 0 || b === 0)) continue;
-    if (p.noCarry && (a % 10) + (b % 10) >= 10) continue;
-
-    out.push({ left: a, right: b });
+    out.push({ left: a, right: b, sum: sum, missingPosition });
   }
 
   return out;
@@ -42,7 +43,12 @@ function toTwoColumnTex(problems: Problem[]): string {
   const lines: string[] = [];
 
   problems.forEach((q, i) => {
-    const cell = `\\TextAdd{${q.left}}{${q.right}}`;
+    let cell: string;
+    if (q.missingPosition === "left") {
+      cell = `\\Large \\rule{40pt}{0.6pt} + ${q.right} = ${q.sum}`;
+    } else {
+      cell = `\\Large ${q.left} + \\rule{40pt}{0.6pt} = ${q.sum}`;
+    }
     if (i % 2 === 0) lines.push(cell + " & ");
     else lines[lines.length - 1] += cell + " \\\\";
   });
@@ -59,8 +65,20 @@ function toAnswersTex(problems: Problem[]): string {
 
   problems.forEach((q, i) => {
     const problemNumber = i + 1;
-    const answer = q.left + q.right;
-    const cell = `\\Large ${problemNumber}) ${q.left} + ${q.right} = ${answer}`;
+    const missing = q.missingPosition === "left" ? q.left : q.right;
+    
+    let problemStr: string;
+    let answerStr: string;
+    
+    if (q.missingPosition === "left") {
+      problemStr = `\\rule{40pt}{0.6pt} + ${q.right} = ${q.sum}`;
+      answerStr = `${q.left}`;
+    } else {
+      problemStr = `${q.left} + \\rule{40pt}{0.6pt} = ${q.sum}`;
+      answerStr = `${q.right}`;
+    }
+    
+    const cell = `\\Large ${problemNumber}) ${problemStr} \\quad (${answerStr})`;
     if (i % 2 === 0) lines.push(cell + " & ");
     else lines[lines.length - 1] += cell + " \\\\";
   });
@@ -82,22 +100,20 @@ function main() {
 
   const p: Params = {
     count: Number(argv.count ?? 24),
-    min: Number(argv.min ?? 0),
-    max: Number(argv.max ?? 10),
-    noCarry: Boolean(argv.noCarry ?? false),
-    allowZeroSingle: Boolean(argv.allowZeroSingle ?? false),
+    minTens: Number(argv.minTens ?? 1),
+    maxTens: Number(argv.maxTens ?? 9),
     seed: argv.seed !== undefined ? Number(argv.seed) : undefined,
     version: String(argv.version ?? "v1"),
-    name: argv.name ? String(argv.name) : undefined,  // 从命令行参数读取 name（由 generate_all.ts 传递）
+    name: argv.name ? String(argv.name) : undefined,
   };
 
-  if (Number.isNaN(p.count) || Number.isNaN(p.min) || Number.isNaN(p.max)) {
-    console.error("Invalid numeric args. Example: --count 24 --min 0 --max 10 --noCarry --seed 2025");
+  if (Number.isNaN(p.count) || Number.isNaN(p.minTens) || Number.isNaN(p.maxTens)) {
+    console.error("Invalid numeric args. Example: --count 24 --minTens 1 --maxTens 9 --seed 2025");
     process.exit(1);
   }
 
-  if (p.min > p.max) {
-    console.error("--min cannot be greater than --max.");
+  if (p.minTens > p.maxTens) {
+    console.error("--minTens cannot be greater than --maxTens.");
     process.exit(1);
   }
 
@@ -111,10 +127,9 @@ function main() {
   const actualSeed = p.seed !== undefined ? p.seed : Date.now();
   // 同时写出 meta，便于命名
   const meta = {
-    topic: "addition",
-    range: `${p.min}-${p.max}`,
+    topic: "adding-whole-tens-missing",
+    range: `${p.minTens * 10}-${p.maxTens * 10}`,
     seed: actualSeed,
-    noCarry: !!p.noCarry,
     version: p.version,
     name: p.name // 保存配置中的 name
   };
@@ -125,4 +140,3 @@ function main() {
 }
 
 main();
-

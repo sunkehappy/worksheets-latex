@@ -1,0 +1,11 @@
+% Common header for worksheets
+% Usage: \input{ws_header.tex}
+% Parameters: \worksheetTitle (should be set before including this file)
+
+\begin{center}
+  {\LARGE \worksheetTitle}\\[16pt]
+  \begin{tabular*}{0.8\linewidth}{@{\extracolsep{\fill}}p{0.4\linewidth}p{0.4\linewidth}@{}}
+    Name:\ \rule{0.3\linewidth}{0.4pt} &
+    Date:\ \rule{0.3\linewidth}{0.4pt}
+  \end{tabular*}
+\end{center}

@@ -1,0 +1,17 @@
+% Common footer setup for worksheets (should be included before \begin{document})
+% Sets up fancyhdr with QR code and website URL
+
+\usepackage{fancyhdr}  % 用于页眉页脚
+\usepackage{qrcode}    % 用于生成二维码
+
+% 设置footer
+\pagestyle{fancy}
+\fancyhf{}  % 清除所有页眉页脚
+\fancyfoot[L]{%
+  \raisebox{-3mm}{\qrcode[height=12mm]{https://www.google.com/imgres?imgurl=https://www.k5learning.com/worksheets/kindergarten-adding-using-pictures-1.gif}}%
+}
+\fancyfoot[R]{%
+  https://k12math.net%
+}
+\renewcommand{\headrulewidth}{0pt}  % 移除页眉线
+\renewcommand{\footrulewidth}{0pt}  % 移除页脚线

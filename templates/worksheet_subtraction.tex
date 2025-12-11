@@ -6,8 +6,8 @@
 
 \setlength{\parindent}{0pt}
 
-% Single text question: a + b = ____ (answer line)
-\newcommand{\TextAdd}[2]{\Large #1 + #2 = \rule{40pt}{0.6pt}}
+% Single text question: a - b = ____ (answer line)
+\newcommand{\TextSub}[2]{\LARGE #1 - #2 = \rule{40pt}{0.6pt}}
 
 % Setup footer with QR code and website
 \input{ws_footer_setup.tex}
@@ -15,11 +15,11 @@
 \begin{document}
 
 % Set worksheet title
-\newcommand{\worksheetTitle}{Addition Practice}
+\newcommand{\worksheetTitle}{Subtraction Practice}
 \input{ws_header.tex}
 
-\vspace{10pt}
-\setlength{\extrarowheight}{18pt}
+\vspace{8pt}
+\setlength{\extrarowheight}{16pt}
 \begin{tabular}{p{0.48\linewidth} p{0.48\linewidth}}
 \input{../generated/problems.tex}
 \end{tabular}

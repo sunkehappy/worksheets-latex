@@ -89,6 +89,84 @@
         "version": "v1",
         "showExample": true
       }
+    },
+    {
+      "type": "subtraction",
+      "name": "Subtraction Mental Math 0-10",
+      "outputPath": "grade-1/subtracting/subtraction-mental-math",
+      "params": {
+        "count": 36,
+        "min": 1,
+        "max": 10,
+        "allowZeroSingle": false,
+        "seed": 2025,
+        "version": "v1"
+      }
+    },
+    {
+      "type": "subtraction",
+      "name": "Subtraction Mental Math 0-20",
+      "outputPath": "grade-1/subtracting/subtraction-mental-math",
+      "params": {
+        "count": 36,
+        "min": 1,
+        "max": 20,
+        "allowZeroSingle": false,
+        "seed": 20251210,
+        "version": "v1"
+      }
+    },
+    {
+      "type": "whole-tens-add",
+      "name": "Adding Whole Tens",
+      "outputPath": "grade-2/adding/adding-whole-tens",
+      "params": {
+        "count": 36,
+        "minTens": 1,
+        "maxTens": 9,
+        "seed": 2025,
+        "version": "v1"
+      }
+    },
+    {
+      "type": "whole-tens-missing",
+      "name": "Adding Whole Tens, Missing Number",
+      "outputPath": "grade-2/adding/adding-whole-tens-missing",
+      "params": {
+        "count": 36,
+        "minTens": 1,
+        "maxTens": 9,
+        "seed": 2025,
+        "version": "v1"
+      }
+    },
+    {
+      "type": "add-2digit-1digit",
+      "name": "Add 2-digit and 1-digit Numbers",
+      "outputPath": "grade-2/adding/add-2digit-1digit",
+      "params": {
+        "count": 40,
+        "min2Digit": 10,
+        "max2Digit": 99,
+        "min1Digit": 1,
+        "max1Digit": 9,
+        "seed": 2025,
+        "version": "v1"
+      }
+    },
+    {
+      "type": "add-2digit-1digit-missing",
+      "name": "Add 2-digit and 1-digit Numbers, Missing Addend",
+      "outputPath": "grade-2/adding/add-2digit-1digit-missing",
+      "params": {
+        "count": 40,
+        "min2Digit": 10,
+        "max2Digit": 99,
+        "min1Digit": 1,
+        "max1Digit": 9,
+        "seed": 2025,
+        "version": "v1"
+      }
     }
   ]
 }

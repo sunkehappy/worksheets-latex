@@ -79,3 +79,8 @@ pnpm generate:all --index 2 --count 5
 ```
 pnpm generate:all --type number-lines
 ```
+
+生成10以内心算剪法
+```
+pnpm generate:all --type subtraction
+```

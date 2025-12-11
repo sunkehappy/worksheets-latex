@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm generate:all)",
+      "Bash(find . -name *.preview.png)",
+      "Bash(ls -la *.md)",
+      "Bash(grep -r \"github\\|pdf\\|preview\" . --include=*.json --include=*.md --exclude-dir=node_modules)"
+    ]
+  }
+}

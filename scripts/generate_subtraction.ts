@@ -1,13 +1,12 @@
 import fs from "node:fs";
 import minimist from "minimist";
 
-type Problem = { left: number; right: number };
+type Problem = { minuend: number; subtrahend: number };
 
 type Params = {
   count: number;        // number of problems
   min: number;          // min operand (inclusive)
   max: number;          // max operand (inclusive)
-  noCarry?: boolean;    // if true, forbid carry (units place sum < 10)
   allowZeroSingle?: boolean; // allow 0 in either operand
   seed?: number;
   version?: string;     // for output name tagging, default "v1"
@@ -26,13 +25,15 @@ function generate(p: Params): Problem[] {
   const out: Problem[] = [];
 
   while (out.length < p.count) {
-    const a = Math.floor(r() * (p.max - p.min + 1)) + p.min;
-    const b = Math.floor(r() * (p.max - p.min + 1)) + p.min;
+    const minuend = Math.floor(r() * (p.max - p.min + 1)) + p.min;
+    const subtrahend = Math.floor(r() * (p.max - p.min + 1)) + p.min;
 
-    if (!p.allowZeroSingle && (a === 0 || b === 0)) continue;
-    if (p.noCarry && (a % 10) + (b % 10) >= 10) continue;
+    // 确保结果不是负数（被减数 >= 减数）
+    if (minuend < subtrahend) continue;
+    
+    if (!p.allowZeroSingle && (minuend === 0 || subtrahend === 0)) continue;
 
-    out.push({ left: a, right: b });
+    out.push({ minuend, subtrahend });
   }
 
   return out;
@@ -42,7 +43,8 @@ function toTwoColumnTex(problems: Problem[]): string {
   const lines: string[] = [];
 
   problems.forEach((q, i) => {
-    const cell = `\\TextAdd{${q.left}}{${q.right}}`;
+    const problemNumber = i + 1;
+    const cell = `\\LARGE ${problemNumber}) \\TextSub{${q.minuend}}{${q.subtrahend}}`;
     if (i % 2 === 0) lines.push(cell + " & ");
     else lines[lines.length - 1] += cell + " \\\\";
   });
@@ -59,8 +61,8 @@ function toAnswersTex(problems: Problem[]): string {
 
   problems.forEach((q, i) => {
     const problemNumber = i + 1;
-    const answer = q.left + q.right;
-    const cell = `\\Large ${problemNumber}) ${q.left} + ${q.right} = ${answer}`;
+    const answer = q.minuend - q.subtrahend;
+    const cell = `\\LARGE ${problemNumber}) ${q.minuend} - ${q.subtrahend} = ${answer}`;
     if (i % 2 === 0) lines.push(cell + " & ");
     else lines[lines.length - 1] += cell + " \\\\";
   });
@@ -81,10 +83,9 @@ function main() {
   const argv = minimist(args);
 
   const p: Params = {
-    count: Number(argv.count ?? 24),
-    min: Number(argv.min ?? 0),
+    count: Number(argv.count ?? 20),
+    min: Number(argv.min ?? 1),
     max: Number(argv.max ?? 10),
-    noCarry: Boolean(argv.noCarry ?? false),
     allowZeroSingle: Boolean(argv.allowZeroSingle ?? false),
     seed: argv.seed !== undefined ? Number(argv.seed) : undefined,
     version: String(argv.version ?? "v1"),
@@ -92,7 +93,7 @@ function main() {
   };
 
   if (Number.isNaN(p.count) || Number.isNaN(p.min) || Number.isNaN(p.max)) {
-    console.error("Invalid numeric args. Example: --count 24 --min 0 --max 10 --noCarry --seed 2025");
+    console.error("Invalid numeric args. Example: --count 20 --min 1 --max 10 --seed 2025");
     process.exit(1);
   }
 
@@ -111,10 +112,9 @@ function main() {
   const actualSeed = p.seed !== undefined ? p.seed : Date.now();
   // 同时写出 meta，便于命名
   const meta = {
-    topic: "addition",
+    topic: "subtraction",
     range: `${p.min}-${p.max}`,
     seed: actualSeed,
-    noCarry: !!p.noCarry,
     version: p.version,
     name: p.name // 保存配置中的 name
   };
@@ -125,4 +125,3 @@ function main() {
 }
 
 main();
-
